@@ -15,8 +15,7 @@ var addCmd = &cobra.Command{
 }
 
 func runAddCmd(cmd *cobra.Command, args []string) error {
-	queueName := cmd.Flag(FlagQueue).Value.String()
-	client, err := getQueueClient(queueName)
+	client, err := getQueueClientForCommand(cmd)
 	if nil != err {
 		return nil
 	}
@@ -34,8 +33,7 @@ func runAddCmd(cmd *cobra.Command, args []string) error {
 func init() {
 	rootCmd.AddCommand(addCmd)
 
-	addCmd.Flags().StringP(FlagQueue, "q", "", "name of the queue")
-	addCmd.MarkFlagRequired(FlagQueue)
+	addQueueConnectionFlags(addCmd)
 
 	// TODO: add flag for base64 encoding, flag for visibility timeout, flag for TTL, flag for number-of-times
 }

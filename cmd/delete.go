@@ -34,8 +34,7 @@ func runDeleteCmd(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(cmd.ErrOrStderr(), "Failed to parse script template: %v\n", err)
 	}
 
-	queueName := cmd.Flag(FlagQueue).Value.String()
-	client, err := getQueueClient(queueName)
+	client, err := getQueueClientForCommand(cmd)
 	if nil != err {
 		return nil
 	}
@@ -81,7 +80,7 @@ func runDeleteCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), "Matched %d messages from queue %q.\n", numMatched, queueName)
+	fmt.Fprintf(cmd.OutOrStdout(), "Matched %d message(s).\n", numMatched)
 
 	return nil
 }
@@ -168,8 +167,7 @@ func execScriptTemplate(cmd *cobra.Command, tmpl *template.Template, msg *queueM
 func init() {
 	rootCmd.AddCommand(deleteCmd)
 
-	deleteCmd.Flags().StringP(FlagQueue, "q", "", "name of the queue")
-	deleteCmd.MarkFlagRequired(FlagQueue)
+	addQueueConnectionFlags(deleteCmd)
 
 	deleteCmd.Flags().StringP(FlagScript, "s", "", "message evaluation script; supports go templates (https://pkg.go.dev/text/template)")
 	deleteCmd.MarkFlagRequired(FlagScript)

@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute(errHandler func(error)) {
-	if err := rootCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); nil != err {
 		fmt.Fprintln(rootCmd.OutOrStdout(), err)
 		errHandler(err)
 	}

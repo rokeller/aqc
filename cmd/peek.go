@@ -18,10 +18,9 @@ var peekCmd = &cobra.Command{
 }
 
 func runPeekCmd(cmd *cobra.Command, args []string) error {
-	queueName := cmd.Flag(FlagQueue).Value.String()
-	client, err := getQueueClient(queueName)
+	client, err := getQueueClientForCommand(cmd)
 	if nil != err {
-		return nil
+		return err
 	}
 
 	count := getInt32FlagValue(cmd, FlagCount)
@@ -57,8 +56,7 @@ func runPeekCmd(cmd *cobra.Command, args []string) error {
 func init() {
 	rootCmd.AddCommand(peekCmd)
 
-	peekCmd.Flags().StringP(FlagQueue, "q", "", "name of the queue")
-	peekCmd.MarkFlagRequired(FlagQueue)
+	addQueueConnectionFlags(peekCmd)
 
 	peekCmd.Flags().Int32P(FlagCount, "c", 32, "number of messages to peek")
 }

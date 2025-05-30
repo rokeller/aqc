@@ -15,8 +15,7 @@ var clearCmd = &cobra.Command{
 }
 
 func runClearCmd(cmd *cobra.Command, args []string) error {
-	queueName := cmd.Flag(FlagQueue).Value.String()
-	client, err := getQueueClient(queueName)
+	client, err := getQueueClientForCommand(cmd)
 	if nil != err {
 		return nil
 	}
@@ -34,6 +33,5 @@ func runClearCmd(cmd *cobra.Command, args []string) error {
 func init() {
 	rootCmd.AddCommand(clearCmd)
 
-	clearCmd.Flags().StringP(FlagQueue, "q", "", "name of the queue")
-	clearCmd.MarkFlagRequired(FlagQueue)
+	addQueueConnectionFlags(clearCmd)
 }

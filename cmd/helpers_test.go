@@ -67,6 +67,16 @@ func fetchTestQueueMesssagesFromQueue(t *testing.T, client *azqueue.QueueClient)
 	return resp.Messages
 }
 
+func fetchTestQueueMessageCount(t *testing.T, queueName string) int {
+	client := getStorageEmulatorQueueClient(t, queueName)
+	resp, err := client.GetProperties(t.Context(), nil)
+	if nil != err {
+		t.Fatalf("failed to fetch properties from test queue %q: %v", queueName, err)
+	}
+
+	return int(*resp.ApproximateMessagesCount)
+}
+
 func executeTestCases(t *testing.T, testCases []testCase) {
 	t.Helper()
 

@@ -17,16 +17,20 @@ var addCmd = &cobra.Command{
 func runAddCmd(cmd *cobra.Command, args []string) error {
 	client, err := getQueueClientForCommand(cmd)
 	if nil != err {
-		return nil
+		return err
 	}
 
+	numAdded := 0
 	for _, msg := range args {
 		_, err := client.EnqueueMessage(cmd.Context(), msg, nil)
 		if nil != err {
 			fmt.Fprintf(cmd.ErrOrStderr(), "Failed to add message %q: %v\n", msg, err)
+		} else {
+			numAdded += 1
 		}
 	}
 
+	fmt.Fprintf(cmd.OutOrStdout(), "Added %d message(s).\n", numAdded)
 	return nil
 }
 

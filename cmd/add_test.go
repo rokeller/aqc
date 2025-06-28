@@ -6,7 +6,7 @@ import (
 )
 
 func Test_runAddCmd(t *testing.T) {
-	createTestQueue("test-add")
+	createTestQueue(t, "test-add")
 
 	tc := []testCase{
 		{

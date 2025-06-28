@@ -16,9 +16,11 @@ type testCase struct {
 	name           string
 	args           []string
 	err            error
+	errContains    string
 	stdOut         string
 	stdOutContains string
 	stdErr         string
+	stdErrContains string
 	verify         func(t *testing.T)
 }
 
@@ -91,16 +93,28 @@ func (testCase testCase) executeTestCase(t *testing.T) {
 
 	stdOut, stdErr, err := execute(t, testCase.args...)
 
-	assert.Equal(t, testCase.err, err, "expected error must match")
+	if testCase.errContains != "" {
+		assert.Contains(t, err.Error(), testCase.errContains,
+			"error must contain the string; error: %q", err)
+	} else {
+		assert.Equal(t, testCase.err, err, "expected error must match")
+	}
 
 	if testCase.err == nil {
 		if testCase.stdOutContains != "" {
-			assert.Contains(t, stdOut, testCase.stdOutContains, "stdout must contain the string")
+			assert.Contains(t, stdOut, testCase.stdOutContains,
+				"stdout must contain the string; stdout: %q", stdOut)
 
 		} else {
 			assert.Equal(t, testCase.stdOut, stdOut, "stdout must match")
 		}
-		assert.Equal(t, testCase.stdErr, stdErr, "stderr must match")
+
+		if testCase.stdErrContains != "" {
+			assert.Contains(t, stdErr, testCase.stdErrContains,
+				"stderr must contain the string; stderr: %q", stdErr)
+		} else {
+			assert.Equal(t, testCase.stdErr, stdErr, "stderr must match")
+		}
 	}
 
 	if testCase.verify != nil {

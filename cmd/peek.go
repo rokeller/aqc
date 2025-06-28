@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +26,7 @@ func runPeekCmd(cmd *cobra.Command, args []string) error {
 
 	count := getInt32FlagValue(cmd, FlagCount)
 	if nil == count {
-		*count = 32
+		count = to.Ptr(int32(32))
 	} else if *count <= 0 {
 		*count = 1
 	} else if *count > 32 {
@@ -40,7 +41,7 @@ func runPeekCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.ErrOrStderr(), "Peeking %d messages.\n", len(resp.Messages))
+	fmt.Fprintf(cmd.ErrOrStderr(), "Peeking %d message(s).\n", len(resp.Messages))
 	for _, msg := range resp.Messages {
 		json, err := json.Marshal(msg)
 		if nil != err {

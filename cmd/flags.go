@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue"
@@ -18,24 +19,48 @@ const (
 	FlagDecodeBase64    = "decode-base64"
 	FlagDecodeJson      = "decode-json"
 	FlagWhatIf          = "what-if"
+
+	PrefixSource      = "src-"
+	PrefixDestination = "dst-"
 )
 
 func addQueueConnectionFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool(FlagStorageEmulator, false, "connect to the storage emulator")
-	cmd.Flags().StringP(FlagQueue, "q", "", "name of the queue")
-	cmd.Flags().String(FlagQueueURL, "", "URL of the queue")
-	cmd.Flags().String(FlagServiceURL, "", "URL of the queue service")
+	addQueueConnectionFlagsWithPrefix(cmd, "", "")
+}
 
-	cmd.MarkFlagsMutuallyExclusive(FlagQueue, FlagQueueURL)
-	cmd.MarkFlagsMutuallyExclusive(FlagStorageEmulator, FlagServiceURL, FlagQueueURL)
-	cmd.MarkFlagsOneRequired(FlagStorageEmulator, FlagServiceURL, FlagQueueURL)
+func addQueueConnectionFlagsWithPrefix(cmd *cobra.Command, prefix, queueName string) {
+	if queueName == "" {
+		queueName = "queue"
+	}
+
+	cmd.Flags().Bool(prefix+FlagStorageEmulator, false,
+		fmt.Sprintf("connect to the storage emulator for the %s", queueName))
+	if prefix == "" {
+		cmd.Flags().StringP(FlagQueue, "q", "",
+			fmt.Sprintf("name of the %s", queueName))
+	} else {
+		cmd.Flags().String(prefix+FlagQueue, "",
+			fmt.Sprintf("name of the %s", queueName))
+	}
+	cmd.Flags().String(prefix+FlagQueueURL, "",
+		fmt.Sprintf("URL of the %s", queueName))
+	cmd.Flags().String(prefix+FlagServiceURL, "",
+		fmt.Sprintf("URL of service of the %s", queueName))
+
+	cmd.MarkFlagsMutuallyExclusive(prefix+FlagQueue, prefix+FlagQueueURL)
+	cmd.MarkFlagsMutuallyExclusive(prefix+FlagStorageEmulator, prefix+FlagServiceURL, prefix+FlagQueueURL)
+	cmd.MarkFlagsOneRequired(prefix+FlagStorageEmulator, prefix+FlagServiceURL, prefix+FlagQueueURL)
 }
 
 func getQueueClientForCommand(cmd *cobra.Command) (*azqueue.QueueClient, error) {
-	useEmulator := getBoolFlagValue(cmd, FlagStorageEmulator)
-	queueName := cmd.Flag(FlagQueue).Value.String()
-	queueURL := cmd.Flag(FlagQueueURL).Value.String()
-	serviceURL := cmd.Flag(FlagServiceURL).Value.String()
+	return getQueueClientForCommandWithPrefix(cmd, "")
+}
+
+func getQueueClientForCommandWithPrefix(cmd *cobra.Command, prefix string) (*azqueue.QueueClient, error) {
+	useEmulator := getBoolFlagValue(cmd, prefix+FlagStorageEmulator)
+	queueName := cmd.Flag(prefix + FlagQueue).Value.String()
+	queueURL := cmd.Flag(prefix + FlagQueueURL).Value.String()
+	serviceURL := cmd.Flag(prefix + FlagServiceURL).Value.String()
 
 	if nil != useEmulator && *useEmulator {
 		return getQueueClientForStorageEmulator(queueName)
@@ -51,7 +76,8 @@ func getQueueClientForCommand(cmd *cobra.Command) (*azqueue.QueueClient, error) 
 
 	if "" != serviceURL {
 		if "" == queueName {
-			return nil, errors.New("The queue parameter must be provided when the service-url parameter is passed")
+			return nil, errors.New(
+				"The queue parameter must be provided when the service-url parameter is passed")
 		}
 
 		return getQueueClientForServiceURLWithDefaultCredential(serviceURL, queueName)

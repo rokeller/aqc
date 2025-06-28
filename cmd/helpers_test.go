@@ -53,12 +53,15 @@ func addTestQueueMesssages(t *testing.T, queueName string, msgs []string) {
 
 func fetchTestQueueMesssages(t *testing.T, queueName string) []*azqueue.DequeuedMessage {
 	client := getStorageEmulatorQueueClient(t, queueName)
+	return fetchTestQueueMesssagesFromQueue(t, client)
+}
 
+func fetchTestQueueMesssagesFromQueue(t *testing.T, client *azqueue.QueueClient) []*azqueue.DequeuedMessage {
 	resp, err := client.DequeueMessages(t.Context(), &azqueue.DequeueMessagesOptions{
 		NumberOfMessages: to.Ptr(int32(32)),
 	})
 	if nil != err {
-		t.Fatalf("failed to fetch messages from test queue %q: %v", queueName, err)
+		t.Fatalf("failed to fetch messages from test queue: %v", err)
 	}
 
 	return resp.Messages

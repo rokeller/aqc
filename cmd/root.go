@@ -11,7 +11,7 @@ var version string
 var rootCmd = &cobra.Command{
 	Use:           "aqc",
 	Short:         "aqc manages queues in Azure storage accounts",
-	Long:          "aqc (Azure Queue Commands) helps managing queues and messages in Azure storage accounts",
+	Long:          "aqc (Azure Queue Commands) helps managing messages in queues of Azure storage accounts",
 	Args:          cobra.NoArgs,
 	SilenceErrors: true,
 

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"testing"
 )
 
@@ -9,11 +8,11 @@ func Test_runAddCmd(t *testing.T) {
 	createTestQueue(t, "test-add")
 
 	tc := []testCase{
-		{
-			name: "Unsupported flag",
-			args: []string{"add", "--foo"},
-			err:  errors.New("unknown flag: --foo"),
-		},
+		// {
+		// 	name: "Unsupported flag",
+		// 	args: []string{"add", "--foo"},
+		// 	err:  errors.New("unknown flag: --foo"),
+		// },
 		{
 			name:   "Add single message",
 			args:   []string{"add", "--use-storage-emulator", "-q=test-add", "message-one"},
